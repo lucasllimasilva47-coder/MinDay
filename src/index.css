@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* O app é todo escuro: o navegador passa a desenhar a lista dos selects,
+   o calendário e o relógio dos campos de data/hora também em modo escuro. */
+:root {
+  color-scheme: dark;
+}
+
+/* Reforço: fundo e texto das opções dentro de um <select> aberto. */
+select option {
+  background-color: #0b1b2d;
+  color: #ffffff;
+}
+
+/* Evita o flash branco antes do React carregar e na rolagem elástica. */
+body {
+  background-color: #0b1b2d;
+}
+
+/* Aviso de XP / nível: entra "saltando" na tela. */
+@keyframes pop {
+  0% { transform: translateY(14px) scale(0.9); opacity: 0; }
+  60% { transform: translateY(-2px) scale(1.04); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.animate-pop {
+  animation: pop 0.35s ease-out both;
+}
+
+/* Respeita quem prefere menos movimento no sistema. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
+  }
+}

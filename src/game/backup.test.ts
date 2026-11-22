@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBackup } from "./backup";
+import { applyBackup, buildBackup, parseBackup, type StorageLike } from "./backup";
 
 function backupWithProgress(progress: unknown): string {
   return JSON.stringify({
@@ -30,5 +30,74 @@ describe("backup do progresso", () => {
     );
 
     expect(result.ok).toBe(false);
+  });
+});
+
+describe("restauração do backup", () => {
+  it("exporta a cópia de recuperação sem bloquear uma restauração", () => {
+    const values = new Map<string, string>([
+      ["minday.progress", "{json incompleto"],
+      ["minday.recovery.progress", "{json incompleto"],
+    ]);
+    const storage: StorageLike = {
+      get length() {
+        return values.size;
+      },
+      key(index: number) {
+        return [...values.keys()][index] ?? null;
+      },
+      getItem(key: string) {
+        return values.get(key) ?? null;
+      },
+      setItem(key: string, value: string) {
+        values.set(key, value);
+      },
+      removeItem(key: string) {
+        values.delete(key);
+      },
+    };
+
+    const backup = buildBackup(storage);
+    const parsed = parseBackup(backup);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      expect(parsed.data["minday.recovery.progress"]).toBe("{json incompleto");
+      expect(parsed.data["minday.progress"]).toBeUndefined();
+    }
+  });
+
+  it("mantém os dados anteriores se uma gravação falhar", () => {
+    const values = new Map<string, string>([
+      ["minday.tasks", JSON.stringify([{ id: "1", title: "Original", status: "Pendente" }])],
+      ["outro.site", "não alterar"],
+    ]);
+    const storage: StorageLike = {
+      get length() {
+        return values.size;
+      },
+      key(index: number) {
+        return [...values.keys()][index] ?? null;
+      },
+      getItem(key: string) {
+        return values.get(key) ?? null;
+      },
+      setItem(key: string, value: string) {
+        if (key === "minday.profile.name") throw new Error("quota");
+        values.set(key, value);
+      },
+      removeItem(key: string) {
+        values.delete(key);
+      },
+    };
+
+    expect(() =>
+      applyBackup(storage, {
+        "minday.tasks": "[]",
+        "minday.profile.name": "Novo nome",
+      })
+    ).toThrow("quota");
+
+    expect(storage.getItem("minday.tasks")).toContain("Original");
+    expect(storage.getItem("outro.site")).toBe("não alterar");
   });
 });

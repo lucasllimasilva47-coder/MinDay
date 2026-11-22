@@ -17,6 +17,25 @@ select option {
 /* Evita o flash branco antes do React carregar e na rolagem elástica. */
 body {
   background-color: #0b1b2d;
+  margin: 0;
+  min-width: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select {
+  touch-action: manipulation;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(56, 189, 248, 0.35);
+  color: #ffffff;
 }
 
 /* Aviso de XP / nível: entra "saltando" na tela. */

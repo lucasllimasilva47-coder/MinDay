@@ -31,11 +31,12 @@ export function loadSleepRange(): SleepRange {
   }
 }
 
-export function saveSleepRange(range: SleepRange): void {
+export function saveSleepRange(range: SleepRange): boolean {
   try {
     localStorage.setItem(RANGE_KEY, range);
+    return true;
   } catch {
-    // sem permissão para salvar: a escolha vale só nesta visita
+    return false;
   }
 }
 

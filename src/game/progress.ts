@@ -1,3 +1,5 @@
+import { migrateLegacyData, safeSet } from "./storage";
+
 // Regras do "jogo" do MinDay.
 // Aqui só existe lógica pura (sem React): fica fácil de ler, mudar e testar.
 // Para ajustar a dificuldade do jogo, mexa nas constantes logo abaixo.
@@ -24,7 +26,9 @@ export const XP_CYCLE: Record<Difficulty, number> = {
 };
 
 const STORAGE_KEY = "minday.progress";
+const RECOVERY_STORAGE_KEY = "minday.recovery.progress";
 const DAILY_GOAL_STORAGE_KEY = "minday.dailyGoalXP";
+let progressSaveBlocked = false;
 
 export type DayStats = {
   xp: number;
@@ -293,7 +297,7 @@ function sanitize(data: unknown): Progress {
   const days: Record<string, DayStats> = {};
   if (isRecord(data.days)) {
     for (const [key, v] of Object.entries(data.days)) {
-      if (!isRecord(v)) continue;
+      if (!isLocalDateKey(key) || !isRecord(v)) continue;
       days[key] = {
         xp: num(v.xp),
         cycles: num(v.cycles),
@@ -311,19 +315,30 @@ function sanitize(data: unknown): Progress {
 }
 
 export function loadProgress(): Progress {
+  let raw: string | null = null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    migrateLegacyData(localStorage);
+    raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return emptyProgress();
-    return sanitize(JSON.parse(raw) as unknown);
   } catch {
+    console.error("Não foi possível ler o progresso salvo.");
+    return emptyProgress();
+  }
+  try {
+    return sanitize(JSON.parse(raw) as unknown);
+  } catch (error) {
+    console.error("O progresso salvo não é um JSON válido; uma cópia de recuperação será preservada.", error);
+    progressSaveBlocked = !safeSet(localStorage, RECOVERY_STORAGE_KEY, raw);
     return emptyProgress();
   }
 }
 
-export function saveProgress(p: Progress): void {
+export function saveProgress(p: Progress): boolean {
+  if (progressSaveBlocked) return false;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+    return true;
   } catch {
-    // sem espaço ou bloqueado pelo navegador: o jogo continua, só não salva
+    return false;
   }
 }

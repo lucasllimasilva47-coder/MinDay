@@ -17,6 +17,7 @@ import {
 import { safeGet, safeSet } from "../../game/storage";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "../ui";
 import { Mascot } from "../Mascot";
+import { AccountSection } from "./AccountSection";
 
 type ProfileScreenProps = {
   progress: Progress;
@@ -152,6 +153,8 @@ export function ProfileScreen({ progress, streak, dailyGoalXP, dailyGoalSettings
           <p className="text-xs text-white/60">{activeDays} {activeDays === 1 ? "dia ativo" : "dias ativos"} no total.</p>
         </CardContent>
       </Card>
+
+      <AccountSection />
 
       <Card className="bg-white/5 text-white">
         <CardHeader>

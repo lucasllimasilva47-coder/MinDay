@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { useGame } from "../../game/context";
 import { Button } from "../ui";
@@ -7,7 +8,19 @@ import { brand } from "../brand";
 
 export type TabKey = "home" | "agenda" | "pomodoro" | "sono" | "perfil";
 export type NavTab = { key: TabKey; label: string; icon: LucideIcon };
-export function Header({ current, onNavigate, tabs }: { current: TabKey; onNavigate: (k: TabKey) => void; tabs: readonly NavTab[] }) {
+export function Header({
+  current,
+  onNavigate,
+  tabs,
+  onSignOut,
+  signOutBusy,
+}: {
+  current: TabKey;
+  onNavigate: (k: TabKey) => void;
+  tabs: readonly NavTab[];
+  onSignOut: () => void;
+  signOutBusy: boolean;
+}) {
   const { t } = useLanguage();
   const { progress, streak } = useGame();
 
@@ -37,6 +50,16 @@ export function Header({ current, onNavigate, tabs }: { current: TabKey; onNavig
             </Button>
           ))}
         </nav>
+        <Button
+          type="button"
+          onClick={onSignOut}
+          disabled={signOutBusy}
+          aria-label="Sair da conta"
+          className="ml-2 shrink-0 border-0 bg-white/10 text-white hover:bg-white/20 disabled:opacity-50"
+        >
+          <LogOut className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">{signOutBusy ? "Saindo..." : "Sair"}</span>
+        </Button>
       </div>
     </header>
   );

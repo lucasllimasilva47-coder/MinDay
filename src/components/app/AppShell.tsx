@@ -25,7 +25,15 @@ const LEGACY_DATA_KEYS = [
   "minday.profile.bio",
   "minday.dailyGoalXP",
 ] as const;
-export function AppShell() {
+export function AppShell({
+  onSignOut,
+  signOutBusy,
+  signOutError,
+}: {
+  onSignOut: () => void;
+  signOutBusy: boolean;
+  signOutError: string;
+}) {
   const { t } = useLanguage();
   const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
 
@@ -66,7 +74,20 @@ export function AppShell() {
         <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
       ) : (
         <>
-          <Header onNavigate={setTab} current={tab} tabs={tabs} />
+          <Header
+            onNavigate={setTab}
+            current={tab}
+            tabs={tabs}
+            onSignOut={onSignOut}
+            signOutBusy={signOutBusy}
+          />
+          {signOutError && (
+            <div className="mx-auto mt-3 max-w-5xl px-4">
+              <p role="alert" className="rounded-xl bg-rose-400/15 px-4 py-3 text-sm text-rose-200">
+                Não foi possível sair da conta: {signOutError}
+              </p>
+            </div>
+          )}
           <main className="mx-auto w-full max-w-5xl min-w-0 px-4 pb-28 pt-6 sm:pt-10 lg:pb-10">
             {tab === "home" && <HomeScreen onNavigate={setTab} />}
             {tab === "agenda" && <AgendaScreen />}

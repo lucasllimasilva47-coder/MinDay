@@ -1,10 +1,5 @@
-import { GameProvider } from "./game/GameProvider";
-import { AppShell } from "./components/app/AppShell";
+import { AuthGate } from "./auth/AuthGate";
 
 export default function App() {
-  return (
-    <GameProvider>
-      <AppShell />
-    </GameProvider>
-  );
+  return <AuthGate />;
 }
